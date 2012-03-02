@@ -50,7 +50,12 @@ encrypt(const Arguments &args)
     for (int j = 0; j < dlen; j += 8)
         des(ptr + j, ptr + j, keybuf);
 
-    return scope.Close(retbuf->handle_);
+    Local<Object> globalObj = Context::GetCurrent()->Global();
+    Local<Function> bufferConstructor = Local<Function>::Cast(globalObj->Get(String::New("Buffer")));
+    Handle<Value> constructorArgs[3] = { retbuf->handle_, Integer::New(dlen), Integer::New(0) };
+    Local<Object> realBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+
+    return scope.Close(realBuffer);
 }
 
 extern "C" void init (Handle<Object> target)
